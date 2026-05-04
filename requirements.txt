@@ -1,0 +1,11 @@
+entsoe-py
+pandas>=2.2.0
+pyspark>=3.5.0,<3.6.0
+delta-spark==3.0.0
+python-dotenv
+great-expectations==0.18.12
+dbt-core==1.7.4
+dbt-duckdb==1.7.1
+requests==2.31.0
+pyarrow==14.0.2
+fastparquet==2023.10.1
