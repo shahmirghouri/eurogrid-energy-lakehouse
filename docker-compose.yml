@@ -1,0 +1,71 @@
+# This file runs Apache Airflow using Docker Compose
+# It starts 4 containers that work together:
+# 1. airflow-webserver - the web UI at localhost:8080
+# 2. airflow-scheduler - reads your DAGs and runs them on schedule
+# 3. airflow-worker    - actually executes the tasks
+# 4. postgres          - stores Airflow's metadata (task history, etc)
+
+version: '3.8'
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.8.1
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    # Pass your ENTSO-E API key into the Airflow containers
+    ENTSOE_API_KEY: ${ENTSOE_API_KEY}
+    BRONZE_PATH: /opt/airflow/data/bronze
+    SILVER_PATH: /opt/airflow/data/silver
+  volumes:
+    # Mount your local folders into the containers
+    - ./dags:/opt/airflow/dags
+    - ./ingestion:/opt/airflow/ingestion
+    - ./transform:/opt/airflow/transform
+    - ./data:/opt/airflow/data
+    - ./logs:/opt/airflow/logs
+    - ./requirements.txt:/requirements.txt
+  depends_on:
+    postgres:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - 8080:8080     # access at http://localhost:8080
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+
+  airflow-init:
+    <<: *airflow-common
+    command: >
+      bash -c "
+        pip install -r /requirements.txt &&
+        airflow db init &&
+        airflow users create --username admin --password admin --firstname Shahmir --lastname Ghouri --role Admin --email shahmir.ghouri99@gmail.com
+      "
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
