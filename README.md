@@ -51,11 +51,11 @@ cp .env.example .env  # add your ENTSO-E API key
 docker-compose up -d  # starts Airflow at localhost:8080
 ```
 
-## Key findings
+## Key Findings (May 5 – May 8, 2026)
 
-- Belgium had X hours of negative electricity prices in [period]
-- German prices were consistently Y EUR/MWh higher than French on weekdays
-- Solar overproduction events (negative prices) cluster between 11:00-15:00 UTC
+- **Market Price Spread:** France remains the most competitive market in the region with an average price of **86.24 EUR/MWh**, while German prices (**124.48 EUR/MWh**) are **44% higher** on average.
+- **Regional Correlation:** Prices in Belgium (**116.29 EUR/MWh**) and the Netherlands (**118.83 EUR/MWh**) show high correlation, reflecting the strong physical interconnection between these two grid zones.
+- **Negative Price Stability:** No negative price events were recorded during this 4-day weekday window, indicating stable demand-supply balance across the Central Western Europe (CWE) region.
 
 ## Project structure
 
