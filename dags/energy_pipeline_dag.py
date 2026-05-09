@@ -157,3 +157,27 @@ with DAG(
     # Define the order: ingest → validate → check prices
     # >> means "runs before"
     task_bronze_ingestion >> task_validate >> task_check_prices
+
+    # -------------------------------------------------------
+    # Task 4: Transform Bronze data to Silver (PySpark)
+    # -------------------------------------------------------
+    def run_silver_transformation(**context):
+        """
+        Calls the Spark job to clean and enrich data.
+        """
+        import sys
+        # Ensure Airflow can find the 'transform' folder
+        sys.path.insert(0, '/opt/airflow')
+        
+        from transform.silver_spark_job import run_silver_job
+        
+        # This executes the Spark code you've already written
+        run_silver_job()
+
+    task_silver = PythonOperator(
+        task_id='silver_transformation',
+        python_callable=run_silver_transformation,
+    )
+
+    # Updated pipeline order: ingest → validate → check prices → silver
+    task_bronze_ingestion >> task_validate >> task_check_prices >> task_silver    

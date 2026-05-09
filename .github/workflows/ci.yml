@@ -1,0 +1,54 @@
+name: EuroGrid Pipeline CI
+
+# Run this workflow on every push to main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Get the code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Step 3: Install dependencies
+      - name: Install Python packages
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Lint Python code (check for style issues)
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          # Stop the build if there are Python syntax errors
+          flake8 ingestion/ transform/ --count --select=E9,F63,F7,F82 --show-source
+          # Warn on style issues but don't fail
+          flake8 ingestion/ transform/ --count --max-line-length=100 --exit-zero
+
+      # Step 5: Run dbt tests (data quality)
+      - name: Run dbt tests
+        run: |
+          cd dbt_project/eurogrid
+          dbt deps      # install any dbt packages
+          dbt compile   # check SQL syntax without running
+        env:
+          # We don't have real data in CI, so just compile to check SQL syntax
+          DBT_PROFILES_DIR: .
+
+      # Step 6: Check that Docker Compose file is valid
+      - name: Validate docker-compose.yml
+        run: |
+          docker-compose config --quiet
+          echo "docker-compose.yml is valid"

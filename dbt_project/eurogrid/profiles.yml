@@ -1,0 +1,9 @@
+eurogrid:
+  outputs:
+    dev:
+      type: duckdb
+      path: 'C:/Users/shahm/OneDrive/Desktop/Project/Project 1/Code/eurogrid-energy-lakehouse/data/eurogrid.duckdb'
+      extensions:
+        - parquet
+        - httpfs
+  target: dev

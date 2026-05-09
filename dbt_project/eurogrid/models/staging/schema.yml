@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: silver_layer
+    schema: main
+    description: "Cleaned energy data from the Silver Spark job"
+    tables:
+      - name: silver_prices
+        description: "External parquet files partitioned by country, year, and month"
+        # This glob pattern matches your specific directory structure
+        external_location: "C:/Users/shahm/OneDrive/Desktop/Project/Project 1/Code/eurogrid-energy-lakehouse/data/silver/prices/*/*/*/*.parquet"
+
+models:
+  - name: stg_electricity_prices
+    description: >
+      Cleaned electricity price data from ENTSO-E Transparency Platform.
+      Covers Belgium, Germany-Luxembourg, France, and Netherlands.
+      Prices are in EUR per MWh, hourly granularity.
+    
+    columns:
+      - name: price_timestamp
+        description: Hourly timestamp in Europe/Brussels timezone
+        tests:
+          - not_null
+
+      - name: country_code
+        description: ENTSO-E country code (BE, DE_LU, FR, NL)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['BE', 'DE_LU', 'FR', 'NL']
+
+      - name: price_eur_per_mwh
+        description: Day-ahead electricity price in EUR per MWh
+        tests:
+          - not_null
+
+      - name: is_negative_price
+        description: True when price is below 0 EUR/MWh (overproduction event)
+        tests:
+          - not_null
+
+  - name: mart_daily_price_summary
+    description: "Daily price statistics and volatility per country"
+    columns:
+      - name: avg_price_eur_mwh
+        tests:
+          - not_null
+      - name: country_code
+        tests:
+          - not_null
+
+  - name: mart_country_comparison
+    description: "Hourly price comparison and spreads between EU regions"
+    columns:
+      - name: price_spread
+        description: "The difference between the highest and lowest country price at this hour"
