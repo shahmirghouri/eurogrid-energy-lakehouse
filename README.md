@@ -1,6 +1,6 @@
 # EuroGrid Energy Intelligence Lakehouse
 
-![CI Status](https://github.com/yourusername/eurogrid-energy-lakehouse/actions/workflows/ci.yml/badge.svg)
+![CI Status](https://github.com/shahmirghouri/eurogrid-energy-lakehouse/actions/workflows/ci.yml/badge.svg)
 ![Python 3.11](https://img.shields.io/badge/python-3.11-blue)
 ![Airflow 2.8](https://img.shields.io/badge/airflow-2.8-green)
 ![dbt](https://img.shields.io/badge/dbt-1.7-orange)
